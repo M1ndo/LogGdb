@@ -3,23 +3,53 @@ package loggdb
 import (
 	"io"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/log"
 )
 
 type Logger struct {
-	Log *log.Logger
-	Options *log.Options
-	LogWriter io.Writer
-	LogDir string
+	Log        *log.Logger
+	Options    *log.Options
+	LogWriter  io.Writer
+	LogDir     string
+	LogOptions *CustomOpt
 }
 
+type CustomOpt struct {
+	Prefix          string
+	TimeFunction    func() time.Time
+	TimeFormat      string
+	ReportTimestamp bool
+	ReportCaller    bool
+}
+
+const (
+	Info  = log.InfoLevel
+	Debug = log.DebugLevel
+	Warn  = log.WarnLevel
+	Error = log.ErrorLevel
+	Fatal = log.FatalLevel
+)
+
 func (Log *Logger) SetOptions() {
-	Options := &log.Options{
-		Level: log.InfoLevel,
-		Prefix: "Logging 👾 ",
+	if Log.LogOptions != nil {
+		Log.Options = &log.Options{
+			Prefix:          Log.LogOptions.Prefix,
+			TimeFunction:    Log.LogOptions.TimeFunction,
+			TimeFormat:      Log.LogOptions.TimeFormat,
+			ReportTimestamp: Log.LogOptions.ReportTimestamp,
+			ReportCaller:    Log.LogOptions.ReportCaller,
+		}
+		return
 	}
-	Log.Options = Options
+	Log.Options = &log.Options{
+		TimeFunction:    time.Now,
+		TimeFormat:      time.DateTime,
+		ReportTimestamp: true,
+		Level:           Info,
+		Prefix:          "Logging 👾 ",
+	}
 }
 
 func (Log *Logger) createLog() error {
@@ -40,9 +70,7 @@ func (Log *Logger) createLog() error {
 	if err != nil {
 		return err
 	}
-	// newWriter := io.MultiWriter(os.Stdout)
 	Log.LogWriter = io.MultiWriter(LogFile, os.Stdout)
-	// Log.LogWriter = newWriter
 	return nil
 }
 
