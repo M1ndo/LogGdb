@@ -1,5 +1,5 @@
 #+title: LogGgb
-#+HTML: <a href="https://pkg.go.dev/github.com/m1ndo/LogGdb"><img src="https://pkg.go.dev/badge/github.com/m1ndo/LogGdb.svg" alt="Go Reference"><>
+#+HTML: <a href="https://pkg.go.dev/github.com/m1ndo/LogGdb"><img src="https://pkg.go.dev/badge/github.com/m1ndo/LogGdb.svg" alt="Go Reference">
 
 *LogGdb* is a go package that uses /charmbracelet/ "Log" to quickly add a logger in your project.
 Its also supports debugging code incase of a Fatal error.
