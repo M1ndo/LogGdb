@@ -1,7 +1,7 @@
 package main
 
 import (
-	loggdb "github.com/m1ndo/loggdb"
+	loggdb "github.com/m1ndo/LogGdb"
 )
 
 func main() {

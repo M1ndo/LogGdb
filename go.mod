@@ -2,7 +2,7 @@ module github.com/m1ndo/LogGdb
 
 go 1.21.1
 
-require github.com/charmbracelet/log v0.2.4
+require github.com/charmbracelet/log v0.2.5
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
