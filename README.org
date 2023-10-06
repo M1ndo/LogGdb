@@ -15,12 +15,12 @@ type App struct {
 	Logger *loggdb.Logger
 }
 
-func (a *App) NewApp() *App {
+func NewApp() *App {
 	a := &App{Logger: &loggdb.Logger{}}
 	if err := Logger.NewLogger(); err!= nil {
 		panic(err)
 	}
-	Logger.Log.Info("Hello World")
+	a.Logger.Log.Info("Hello World")
 	// Rest of the App / Project
 	return a
 }
