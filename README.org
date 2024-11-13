@@ -21,6 +21,8 @@ func NewApp() *App {
 		panic(err)
 	}
 	a.Logger.Log.Info("Hello World")
+	// To Disable The GDB backTrace .
+	a.Logger.Gdb.Disable(true)
 	// Rest of the App / Project
 	return a
 }
