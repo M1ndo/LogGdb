@@ -1,29 +1,37 @@
 package loggdb
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"time"
 
 	"github.com/charmbracelet/log"
+	"github.com/muesli/termenv"
+	"github.com/snwfdhmp/errlog"
 )
 
+// Logger Main Logger Definition
 type Logger struct {
-	Log        *log.Logger
+	*log.Logger
 	Options    *log.Options
 	LogWriter  io.Writer
-	LogDir     string
 	LogOptions *CustomOpt
+	LogDir          string
+	Gdb        errlog.Logger
 }
 
+// CustomOpt Optional Options to pass to log
 type CustomOpt struct {
 	Prefix          string
 	TimeFunction    func() time.Time
 	TimeFormat      string
 	ReportTimestamp bool
 	ReportCaller    bool
+	LogFileName     string
 }
 
+// Constants
 const (
 	Info  = log.InfoLevel
 	Debug = log.DebugLevel
@@ -32,7 +40,28 @@ const (
 	Fatal = log.FatalLevel
 )
 
-func (Log *Logger) SetOptions() {
+var (
+	DebugPrint = func(format string, data ...interface{}) {
+		fmt.Printf(format+"\n", data...)
+	}
+)
+
+// newDebugger Creates a new debugger to backtrace errors.
+func (Logger *Logger) newDebugger() {
+	Config := &errlog.Config{
+		PrintFunc:          DebugPrint,
+		LinesBefore:        3,
+		LinesAfter:         3,
+		PrintError:         true,
+		PrintSource:        true,
+		PrintStack:         false,
+		ExitOnDebugSuccess: false,
+	}
+	Logger.Gdb = errlog.NewLogger(Config)
+}
+
+// setOptions Set Default Options
+func (Log *Logger) setOptions() {
 	if Log.LogOptions != nil {
 		Log.Options = &log.Options{
 			Prefix:          Log.LogOptions.Prefix,
@@ -52,20 +81,21 @@ func (Log *Logger) SetOptions() {
 	}
 }
 
+// createLog Creates a Log file to save all output to
 func (Log *Logger) createLog() error {
+	var err error
 	if Log.LogDir == "" {
-		var err error
 		Log.LogDir, err = os.Getwd()
 		if err != nil {
 			return err
 		}
 	}
-	if _, err := os.Stat(Log.LogDir); os.IsNotExist(err) {
+	if _, err = os.Stat(Log.LogDir); os.IsNotExist(err) {
 		if err = os.Mkdir(Log.LogDir, 0744); err != nil {
 			return err
 		}
 	}
-	file := Log.LogDir + "/logger.log"
+	file := fmt.Sprintf("%s/%s", Log.LogDir, Log.LogOptions.LogFileName)
 	LogFile, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		return err
@@ -74,13 +104,17 @@ func (Log *Logger) createLog() error {
 	return nil
 }
 
+// NewLogger Creates a new Logger.
 func (Log *Logger) NewLogger() error {
-	Log.SetOptions()
+	Log.setOptions()
+	Log.newDebugger()
 	err := Log.createLog()
 	if err != nil {
 		return err
 	}
 	Logger := log.NewWithOptions(Log.LogWriter, *Log.Options)
-	Log.Log = Logger
+	Log.Logger = Logger
+	// Enforce ANSI256 to fixes colors.
+	Log.Logger.SetColorProfile(termenv.ANSI256)
 	return nil
 }

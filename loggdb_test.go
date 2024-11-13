@@ -21,11 +21,11 @@ func TestLogger(t *testing.T) {
 
 	// Set up a buffer to capture the log output
 	var buf bytes.Buffer
-	logger.Log.SetOutput(&buf)
+	logger.SetOutput(&buf)
 
 	// Write some log messages
-	logger.Log.Info("This is an info message")
-	logger.Log.Error("This is an error message")
+	logger.Info("This is an info message")
+	logger.Error("This is an error message")
 
 	// Get the captured log output from the buffer
 	logOutput := buf.String()
